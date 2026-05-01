@@ -33,7 +33,7 @@ To create a standalone executable from the script, install PyInstaller if not al
 pip install pyinstaller
 
 Then run:
-pyinstaller --onefile --noconsole --add-binary "ffmpeg.exe;." main.py
+pyinstaller main.py --onefile --noconsole --collect-all imageio
 
 Usage Notes:
 The compiled executable will be located in a new /dist directory within your project folder.
