@@ -37,5 +37,6 @@ pyinstaller main.py --onefile --noconsole --collect-all imageio
 
 Usage Notes:
 The compiled executable will be located in a new /dist directory within your project folder.
+
 Ensure you have the necessary permissions on the target system to capture input and send data.
 Use responsibly and in compliance with all applicable laws.
